@@ -5,7 +5,7 @@ import time
 import random
 
 #window frame constants
-WIN_WIDTH = 600
+WIN_WIDTH = 575
 WIN_HEIGHT = 800
 
 #images
@@ -110,7 +110,6 @@ class Pipe():
         self.PIPE_BOTTOM = PIPE_IMG
 
         self.passed = False
-
         self.set_height()
 
     
@@ -127,7 +126,7 @@ class Pipe():
         window.blit(self.PIPE_TOP, (self.x, self.top))
         window.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
 
-
+    #returns true or false based on whether a collisions is detected
     def collide(self, bird, window):
         bird_mask = bird.get_mask()
         top_mask = pygame.mask.from_surface(self.PIPE_TOP)
@@ -135,14 +134,38 @@ class Pipe():
         top_offset = (self.x - bird.x, self.top - round(bird.y))
         bottom_offset = (self.x - bird.x, self.bottom - round(bird.y))
 
-        b_point = bird_mask.overlap(bottom_mask, bottom_offset)
-        t_point = bird_mask.overlap(top_mask,top_offset)
+        top_point = bird_mask.overlap(top_mask,top_offset)
+        bottom_point = bird_mask.overlap(bottom_mask, bottom_offset)
 
-        if b_point or t_point:
+        if top_point or bottom_point:
             return True
 
         return False
 
+
+class Base:
+    VELOCITY = 5
+    WIDTH = BASE_IMG.get_width()
+    IMG = BASE_IMG
+
+    def __init__(self, y):
+        self.y = y
+        self.x1 = 0
+        self.x2 = self.WIDTH
+
+    def move(self):
+        self.x1 -= self.VELOCITY
+        self.x2 -= self.VELOCITY
+
+        if self.x1 + self.WIDTH < 0:
+            self.x1 = self.x2 + self.WIDTH
+
+        if self.x2 + self.WIDTH < 0:
+            self.x2 = self.x1 + self.WIDTH
+
+    def draw(self, window):
+        window.blit(self.IMG, (self.x1, self.y))
+        window.blit(self.IMG, (self.x1, self.y))
 
 
 def draw_window(window, bird):
