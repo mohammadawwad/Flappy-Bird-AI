@@ -2,6 +2,7 @@ import pygame
 import neat
 import os
 import time
+import random
 
 #window frame constants
 WIN_WIDTH = 600
@@ -81,12 +82,92 @@ class Bird:
             self.img_count = 0
 
         if self.tilt <= -80:
-            self.img = self.IMG[1]
+            self.img = self.IMGS[1]
             self.img_count = self.ANIMATION_TIME *2
 
         #hitbox for the bird
         rotated_image = pygame.transform.rotate(self.img, self.tilt)
-        new_rectangle = rotated_image.get_rect(center = self.img.get_rect(topLeft = (self.x, self.y)).center)
+        new_rectangle = rotated_image.get_rect(center = (self.x, self.y))
         window.blit(rotated_image, new_rectangle.topleft)
 
-        
+    def get_mask(self):
+        return pygame.mask.from_surface(self.img)
+
+
+class Pipe():
+    GAP = 200
+    VELOCITY = 5
+
+    def __init__(self, x):
+        self.x = x
+        self.height = 0
+
+        # where the top and bottom of the pipe is
+        self.top = 0
+        self.bottom = 0
+
+        self.PIPE_TOP = pygame.transform.flip(PIPE_IMG, False, True)
+        self.PIPE_BOTTOM = PIPE_IMG
+
+        self.passed = False
+
+        self.set_height()
+
+    
+    def set_height(self):
+        self.height = random.randrange(50, 450)
+        self.top = self.height - self.PIPE_TOP.get_height()
+        self.bottom = self.height + self.GAP
+
+    def move(self):
+        self.x -= self.VELOCITY
+
+    def draw(self, window):
+        # draw top and bottom
+        window.blit(self.PIPE_TOP, (self.x, self.top))
+        window.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
+
+
+    def collide(self, bird, window):
+        bird_mask = bird.get_mask()
+        top_mask = pygame.mask.from_surface(self.PIPE_TOP)
+        bottom_mask = pygame.mask.from_surface(self.PIPE_BOTTOM)
+        top_offset = (self.x - bird.x, self.top - round(bird.y))
+        bottom_offset = (self.x - bird.x, self.bottom - round(bird.y))
+
+        b_point = bird_mask.overlap(bottom_mask, bottom_offset)
+        t_point = bird_mask.overlap(top_mask,top_offset)
+
+        if b_point or t_point:
+            return True
+
+        return False
+
+
+
+def draw_window(window, bird):
+    window.blit(BG_IMG, (0,0))
+    bird.draw(window)
+    pygame.display.update()
+
+def main():
+    bird = Bird(200, 200)
+    window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    fps = pygame.time.Clock()
+
+    run = True
+    while run:
+        fps.tick(30)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        bird.move()
+        draw_window(window, bird)
+
+    pygame.quit()
+    quit()
+
+
+main()
