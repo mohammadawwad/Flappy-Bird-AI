@@ -94,7 +94,7 @@ class Bird:
         return pygame.mask.from_surface(self.img)
 
 
-class Pipe():
+class Pipe:
     GAP = 200
     VELOCITY = 5
 
@@ -165,16 +165,20 @@ class Base:
 
     def draw(self, window):
         window.blit(self.IMG, (self.x1, self.y))
-        window.blit(self.IMG, (self.x1, self.y))
+        window.blit(self.IMG, (self.x2, self.y))
 
 
-def draw_window(window, bird):
+def draw_window(window, bird, pipes, base):
     window.blit(BG_IMG, (0,0))
+    for pipe in pipes:
+        pipe.draw(window)
     bird.draw(window)
     pygame.display.update()
 
 def main():
     bird = Bird(200, 200)
+    pipes = [Pipe(700)]
+    base = Base(730)
     window = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     fps = pygame.time.Clock()
 
@@ -186,8 +190,11 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
 
-        bird.move()
-        draw_window(window, bird)
+        for pipe in pipes:
+            pipe.move()
+        # bird.move()
+        base.move()
+        draw_window(window, bird, pipes, base)
 
     pygame.quit()
     quit()
